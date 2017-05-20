@@ -1,13 +1,19 @@
 const pino = require('pino');
 const log = pino();
 
+const ONE_HOUR = 60 * 60 * 1000;
+
 /**
  * Returns a Cache object
- * @param  {Object} options.db             A mongodb instance
- * @param  {String} options.collectionName The name for the collection to use
- * @return {Object}                        The Cache object
+ * @param  {Object}  options.db             A mongodb instance
+ * @param  {String}  options.collectionName The name for the collection to use
+ * @param  {Integer} options.maxEntries     The maximum number of items in the cache
+ * @param  {Integer} options.TTL            The maxiumum length an item can stay in the cache in milliseconds
+ * @return {Object}                         The Cache object
  */
-function createCache({ db, collectionName = 'cache' } = {}) {
+function createCache(
+    { db, collectionName = 'cache', maxEntries = 100, TTL = ONE_HOUR } = {}
+) {
     /**
      * A promise that resolves to a preexisting or
      * a newly created collection
@@ -46,7 +52,7 @@ function createCache({ db, collectionName = 'cache' } = {}) {
      * @return {Promise<Object>} The resulting document
      */
     async function setKey(key, value) {
-        log.info(`Adding ${key}: ${value} to the collection`);
+        log.info(`Adding { ${key}: ${value} } to the collection`);
 
         // Await the collection
         const coll = await collection;
@@ -57,12 +63,39 @@ function createCache({ db, collectionName = 'cache' } = {}) {
             {
                 $set: {
                     value: value,
+                    updated: new Date(),
                 },
             },
             {
                 upsert: true,
             }
         );
+
+        // Least Recently Used Cache
+        // If the amount of docs in the cache is over the maxEntries limit
+        // find the n docs over the limited sorted by age, getting the oldest
+        // documents and deleting them.
+        const currentKeys = await getKeys();
+        const currentNum = currentKeys.length;
+        const numOverMax = currentNum - maxEntries;
+
+        try {
+            if (currentNum > maxEntries) {
+                const oldestOverLimit = await coll
+                    .find({})
+                    .sort({ updated: 1 })
+                    .limit(numOverMax);
+
+                // Delete them all
+                oldestOverLimit.forEach(doc => {
+                    coll.findOneAndDelete({
+                        _id: doc._id,
+                    });
+                });
+            }
+        } catch (err) {
+            log.error("Couldn't delete old docs", err);
+        }
 
         if (query.result.ok === 1) {
             return getKey(key);
@@ -88,6 +121,7 @@ function createCache({ db, collectionName = 'cache' } = {}) {
                 fields: {
                     name: 1,
                     value: 1,
+                    updated: 1,
                 },
             }
         );
