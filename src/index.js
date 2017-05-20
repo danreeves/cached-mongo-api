@@ -2,7 +2,7 @@ const express = require('express');
 const pino = require('pino');
 const serverSink = require('server-sink');
 const { MongoClient } = require('mongodb');
-const createRouter = require('./api/router');
+const { createRouter } = require('./api/router');
 const createCache = require('./cache');
 
 const API_PORT = 3000;

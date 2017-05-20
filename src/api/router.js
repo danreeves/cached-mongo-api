@@ -2,13 +2,8 @@ const { Router } = require('express');
 const pino = require('pino');
 const bodyparser = require('body-parser');
 
-function createRouter({ cache } = {}) {
-    const router = Router();
-    const log = pino();
-
-    router.use(bodyparser.json());
-
-    router.get('/keys/:key', function getKey(req, res) {
+function mkGetKey({ cache, log }) {
+    return function getKey(req, res) {
         // Get or create data for key
         log.info('GET', req.params.key);
 
@@ -22,9 +17,11 @@ function createRouter({ cache } = {}) {
                 log.error('getKey error', err);
                 res.send(err);
             });
-    });
+    };
+}
 
-    router.put('/keys/:key', function updateKey(req, res) {
+function mkSetKey({ cache, log }) {
+    return function updateKey(req, res) {
         // Update the data for key
         log.info('PUT', req.params.key, req.body);
 
@@ -38,9 +35,11 @@ function createRouter({ cache } = {}) {
                 log.error('setKey error', err);
                 res.send(err);
             });
-    });
+    };
+}
 
-    router.delete('/keys/:key', function deleteKey(req, res) {
+function mkDeleteKey({ cache, log }) {
+    return function deleteKey(req, res) {
         // Delete the data for key
         log.info('DELETE', req.params.key);
 
@@ -54,9 +53,11 @@ function createRouter({ cache } = {}) {
                 log.error('deleteKey error', err);
                 res.send(err);
             });
-    });
+    };
+}
 
-    router.get('/keys', function getAllKeys(req, res) {
+function mkGetAllKeys({ cache, log }) {
+    return function getAllKeys(req, res) {
         // Get all the keys currently in the cache
         log.info('GET all keys');
 
@@ -70,9 +71,11 @@ function createRouter({ cache } = {}) {
                 log.error('getKeys error', err);
                 res.send(err);
             });
-    });
+    };
+}
 
-    router.delete('/keys', function deleteAllKeys(req, res) {
+function mkDeleteAllKeys({ cache, log }) {
+    return function deleteAllKeys(req, res) {
         // Purge all the keys from the cache
         log.info('DELETE all keys');
 
@@ -86,9 +89,29 @@ function createRouter({ cache } = {}) {
                 log.error('deleteKeys error', err);
                 res.send(err);
             });
-    });
+    };
+}
+
+function createRouter({ cache } = {}) {
+    const router = Router();
+    const log = pino();
+
+    router.use(bodyparser.json());
+
+    router.get('/keys/:key', mkGetKey({ cache, log }));
+    router.put('/keys/:key', mkSetKey({ cache, log }));
+    router.delete('/keys/:key', mkDeleteKey({ cache, log }));
+    router.get('/keys', mkGetAllKeys({ cache, log }));
+    router.delete('/keys', mkDeleteAllKeys({ cache, log }));
 
     return router;
 }
 
-module.exports = createRouter;
+module.exports = {
+    createRouter,
+    mkGetKey,
+    mkSetKey,
+    mkDeleteKey,
+    mkGetAllKeys,
+    mkDeleteAllKeys,
+};
