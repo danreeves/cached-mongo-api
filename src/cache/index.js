@@ -20,13 +20,16 @@ function createCache(
      */
     const collection = new Promise((resolve, reject) => {
         log.info('Getting collection:', collectionName);
+
+        // Try getting the collection
         db.collection(collectionName, { strict: true }, (err, coll1) => {
             if (err != undefined) {
-                log.warn("Couldn't get collection", err);
+                log.warn('Couldn\'t get collection', err);
                 log.info(
-                    "Collection doesn't exists. Creating collection:",
+                    'Collection doesn\'t exists. Creating collection:',
                     collectionName
                 );
+                // Create the collection since it doesn't exist
                 db.createCollection(collectionName, (err, coll2) => {
                     if (err != undefined) {
                         log.error(
@@ -34,13 +37,16 @@ function createCache(
                             collectionName,
                             err
                         );
+                        // Complete failure :(
                         reject(err);
                     }
                     log.info('Created collection:', collectionName);
+                    // Return new collection
                     resolve(coll2);
                 });
             }
             log.info('Got collection:', collectionName);
+            // Return collection
             resolve(coll1);
         });
     });
@@ -56,6 +62,7 @@ function createCache(
 
         // Await the collection
         const coll = await collection;
+        // Update or create (upsert)
         const query = await coll.updateOne(
             {
                 _id: key,
@@ -81,6 +88,8 @@ function createCache(
 
         try {
             if (currentNum > maxEntries) {
+                // Get the oldest entries over the
+                // max number allowed
                 const oldestOverLimit = await coll
                     .find({})
                     .sort({ updated: 1 })
@@ -98,6 +107,13 @@ function createCache(
         }
 
         if (query.result.ok === 1) {
+            // Creating the doc was successful
+            // so now we need to get it out again.
+            // This is probably uneccessary since we
+            // have all the data for the doc in this
+            // function scope.
+            // TODO: Optimisation: remove this extra
+            // getKey call.
             return getKey(key);
         } else {
             throw query.result;
@@ -126,8 +142,11 @@ function createCache(
             }
         );
 
-        const docIsTooOld = (new Date().getTime() - new Date(result.updated).getTime()) > TTL;
+        // Check if the doc was last updated within the TTL
+        const docIsTooOld =
+            new Date().getTime() - new Date(result.updated).getTime() > TTL;
 
+        // If we have a result and it's fresh enough
         if (result != undefined && !docIsTooOld) {
             log.info('Cache hit for:', key);
             return result;
@@ -179,7 +198,9 @@ function createCache(
 
         // Await the collection
         const coll = await collection;
+        // Delete everything
         const result = await coll.deleteMany({});
+
         return result;
     }
 
