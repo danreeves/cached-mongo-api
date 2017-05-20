@@ -44,8 +44,8 @@ function createRouter({ cache } = {}) {
         // Delete the data for key
         log.info('DELETE', req.params.key);
 
-        cache.
-            deleteKey(req.params.key)
+        cache
+            .deleteKey(req.params.key)
             .then(result => {
                 log.info('deleteKey success', result);
                 res.send(result);
@@ -59,7 +59,9 @@ function createRouter({ cache } = {}) {
     router.get('/keys', function getAllKeys(req, res) {
         // Get all the keys currently in the cache
         log.info('GET all keys');
-        cache.getKeys()
+
+        cache
+            .getKeys()
             .then(result => {
                 log.info('getKeys success', result);
                 res.send(result);
@@ -74,7 +76,8 @@ function createRouter({ cache } = {}) {
         // Purge all the keys from the cache
         log.info('DELETE all keys');
 
-        cache.purgeCache()
+        cache
+            .purgeCache()
             .then(result => {
                 log.info('deleteKeys success', result);
                 res.send(result);
