@@ -126,7 +126,9 @@ function createCache(
             }
         );
 
-        if (result != undefined) {
+        const docIsTooOld = (new Date().getTime() - new Date(result.updated).getTime()) > TTL;
+
+        if (result != undefined && !docIsTooOld) {
             log.info('Cache hit for:', key);
             return result;
         } else {
