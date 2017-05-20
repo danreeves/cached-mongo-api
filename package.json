@@ -5,15 +5,18 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.js | pino-colada",
+    "dev": "nodemon src/index | pino-colada",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start-mongo": "mongod --dbpath ./.data/db"
   },
   "keywords": [],
-  "author": "",
+  "author": "Dan Reeves <hey@danreev.es>",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.17.2",
     "express": "^4.15.3",
     "mongodb": "^2.2.26",
+    "nodemon": "^1.11.0",
     "pino": "^4.5.2",
     "pino-colada": "^1.4.0"
   }
