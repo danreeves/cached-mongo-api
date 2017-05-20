@@ -28,6 +28,16 @@ describe('Cache', () => {
             'mongodb://localhost:27017/cached-mongo-test'
         );
 
+        // Help mongo out by creating the collections ahead of time
+        // stop it choking on something in createCache. Maybe the concurrent(ish)
+        // getting/creation of collectons.
+        // TODO: Fix this ^^
+        await Promise.all([
+            db.createCollection('cache'),
+            db.createCollection('smallCache'),
+            db.createCollection('shortCache'),
+        ]);
+
         cache = createCache({ db, collectionName: 'cache' });
         smallCache = createCache({
             db,
@@ -39,6 +49,7 @@ describe('Cache', () => {
             collectionName: 'shortCache',
             TTL: 10,
         });
+
         await cache.purgeCache();
         await smallCache.purgeCache();
         await shortCache.purgeCache();
