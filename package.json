@@ -7,7 +7,7 @@
     "start": "node src/index.js | pino-colada",
     "dev": "nodemon src/index | pino-colada",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start-mongo": "mongod --dbpath ./.data/db"
+    "start-mongo": "mongod --syslog --dbpath ./.data/db &"
   },
   "keywords": [],
   "author": "Dan Reeves <hey@danreev.es>",
