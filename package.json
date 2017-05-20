@@ -4,7 +4,7 @@
   "description": "A dummy api cached in a mongo backend",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node src/index.js | pino-colada",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start-mongo": "mongod --dbpath ./.data/db"
   },
@@ -13,6 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.15.3",
-    "mongodb": "^2.2.26"
+    "mongodb": "^2.2.26",
+    "pino": "^4.5.2",
+    "pino-colada": "^1.4.0"
   }
 }
