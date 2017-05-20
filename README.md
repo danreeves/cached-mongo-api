@@ -20,8 +20,15 @@ A dummy api cached in a mongo backend
 ## Setup
 
 - Clone the repo
+- Install & start mongodb (you can use `npm run start-mongo` to start it pointing at a local directory)
 - `npm install`
 - `npm start`
+
+**NOTE**
+
+The tests will use a live (local) mongodb, specifically `mongodb://localhost:27017/cached-mongo-test`.
+
+The actual server is configured (in `src/index.js`) to use `mongodb://localhost:27017/cache`.
 
 ---
 
