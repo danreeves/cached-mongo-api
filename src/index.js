@@ -1,5 +1,6 @@
 const express = require('express');
 const pino = require('pino');
+const serverSink = require('server-sink');
 const { MongoClient } = require('mongodb');
 const createRouter = require('./api/router');
 const createCache = require('./cache');
@@ -19,6 +20,12 @@ MongoClient.connect(MONGO_URL, function(err, db) {
     // Start the server
     const cache = createCache({ db });
     const router = createRouter({ cache });
+
+    // http logging
+    app.use((req, res, next) => {
+        serverSink(req, res, msg => log.info(msg));
+        next();
+    });
 
     app.use('/api', router);
 

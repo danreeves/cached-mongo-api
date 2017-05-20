@@ -21,6 +21,7 @@
     "mongodb": "^2.2.26",
     "nodemon": "^1.11.0",
     "pino": "^4.5.2",
-    "pino-colada": "^1.4.0"
+    "pino-colada": "^1.4.0",
+    "server-sink": "^1.0.0"
   }
 }
