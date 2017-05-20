@@ -20,6 +20,7 @@
     "express": "^4.15.3",
     "mongodb": "^2.2.26",
     "nodemon": "^1.11.0",
+    "p-series": "^1.0.0",
     "pino": "^4.5.2",
     "pino-colada": "^1.4.0",
     "server-sink": "^1.0.0"
