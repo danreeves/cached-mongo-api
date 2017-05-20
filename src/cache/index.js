@@ -1,8 +1,17 @@
 const pino = require('pino');
 const log = pino();
 
+/**
+ * Returns a Cache object
+ * @param  {Object} options.db             A mongodb instance
+ * @param  {String} options.collectionName The name for the collection to use
+ * @return {Object}                        The Cache object
+ */
 function createCache({ db, collectionName = 'cache' } = {}) {
-    // Get or create the mongo collection
+    /**
+     * A promise that resolves to a preexisting or
+     * a newly created collection
+     */
     const collection = new Promise((resolve, reject) => {
         log.info('Getting collection:', collectionName);
         db.collection(collectionName, { strict: true }, (err, coll1) => {
@@ -30,6 +39,12 @@ function createCache({ db, collectionName = 'cache' } = {}) {
         });
     });
 
+    /**
+     * Creates or updates a key in the cache
+     * @param {string} key   The id in the cache
+     * @param {string} value The new value
+     * @return {Promise<Object>} The resulting document
+     */
     async function setKey(key, value) {
         log.info(`Adding ${key}: ${value} to the collection`);
 
@@ -56,6 +71,12 @@ function createCache({ db, collectionName = 'cache' } = {}) {
         }
     }
 
+    /**
+     * Returns the key if it's in the cache,
+     * else it creates a new value for the key
+     * @param  {string} key The id in the cache
+     * @return {Promise<Object>}    The cached value or a newly created one
+     */
     async function getKey(key) {
         log.info(`Getting key: ${key}`);
 
@@ -76,10 +97,15 @@ function createCache({ db, collectionName = 'cache' } = {}) {
             return result;
         } else {
             log.warn('Cache miss for:', key);
-            return setKey(key, (Math.random()).toString());
+            return setKey(key, Math.random().toString());
         }
     }
 
+    /**
+     * Deletes the key from the cache
+     * @param  {string} key The id in the cache
+     * @return {Promise<Object>} The result object returned from the cache
+     */
     async function deleteKey(key) {
         log.info(`Deleting key: ${key}`);
 
@@ -91,6 +117,10 @@ function createCache({ db, collectionName = 'cache' } = {}) {
         return result;
     }
 
+    /**
+     * Gets a list of the keys in the cache
+     * @return {Promise<Array>} A list of string ids
+     */
     async function getKeys() {
         log.info('Getting all keys');
 
@@ -104,6 +134,10 @@ function createCache({ db, collectionName = 'cache' } = {}) {
         return keys;
     }
 
+    /**
+     * Deletes everything in the cache
+     * @return {Promise<Object>} The result object returned from the cache
+     */
     async function purgeCache() {
         log.info('Deleting all keys');
 
