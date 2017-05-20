@@ -1,14 +1,28 @@
 const express = require('express');
 const pino = require('pino');
-const apiRouter = require('./api/router');
+const { MongoClient } = require('mongodb');
+const createRouter = require('./api/router');
+const createCache = require('./cache');
 
-const app = express();
+const API_PORT = 3000;
+const MONGO_URL = `mongodb://localhost:27017/cache`;
+
 const log = pino();
+const app = express();
 
-const PORT = 3000;
+MongoClient.connect(MONGO_URL, function(err, db) {
+    if (err) {
+        log.error(err);
+        process.exit(1);
+    }
 
-app.use('/api', apiRouter);
+    // Start the server
+    const cache = createCache({ db });
+    const router = createRouter({ cache });
 
-app.listen(PORT, () => {
-    log.info(`Listening on port ${PORT}`);
+    app.use('/api', router);
+
+    app.listen(API_PORT, () => {
+        log.info(`Listening on port ${API_PORT}`);
+    });
 });
